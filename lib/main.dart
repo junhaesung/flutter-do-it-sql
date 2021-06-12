@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
 
 class DatabaseApp extends StatefulWidget {
   final Future<Database> db;
+
   DatabaseApp(this.db);
 
   @override
@@ -57,11 +58,28 @@ class _DatabaseApp extends State<DatabaseApp> {
   }
 }
 
-class AddTodoApp extends StatelessWidget {
-  AddTodoApp(Future<Database> database);
+class AddTodoApp extends StatefulWidget {
+  final Future<Database> db;
+
+  AddTodoApp(this.db);
 
   @override
+  State<StatefulWidget> createState() => _AddTodoApp();
+}
+
+class _AddTodoApp extends State<AddTodoApp> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Todo 추가'),
+      ),
+      body: Container(
+        child: Center(
+            child: Column(
+          children: [],
+        )),
+      ),
+    );
   }
 }
