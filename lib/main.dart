@@ -51,12 +51,18 @@ class _DatabaseApp extends State<DatabaseApp> {
       body: Container(),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final todo = await Navigator.of(context).pushNamed('/add');
+          final Todo todo = await Navigator.of(context).pushNamed('/add') as Todo;
+          _insertTodo(todo);
         },
         child: Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  void _insertTodo(Todo todo) async {
+    final Database database = await widget.db;
+    await database.insert('todos', todo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
   }
 }
 
