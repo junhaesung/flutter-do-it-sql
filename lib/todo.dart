@@ -2,13 +2,13 @@ class Todo {
   String title;
   String content;
   bool active;
-  int id;
+  int? id;
 
   Todo(
       {required this.title,
       required this.content,
       required this.active,
-      required this.id});
+      this.id});
 
   Map<String, dynamic> toMap() {
     return {

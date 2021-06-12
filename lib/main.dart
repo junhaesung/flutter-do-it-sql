@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'todo.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -68,6 +70,16 @@ class AddTodoApp extends StatefulWidget {
 }
 
 class _AddTodoApp extends State<AddTodoApp> {
+  late TextEditingController _titleController;
+  late TextEditingController _contentController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = new TextEditingController();
+    _contentController = new TextEditingController();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +89,33 @@ class _AddTodoApp extends State<AddTodoApp> {
       body: Container(
         child: Center(
             child: Column(
-          children: [],
+          children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: TextField(
+                controller: _titleController,
+                decoration: InputDecoration(labelText: '제목'),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: TextField(
+                controller: _contentController,
+                decoration: InputDecoration(labelText: '할 일'),
+              ),
+            ),
+            RaisedButton(
+              onPressed: () {
+                Todo todo = Todo(
+                  title: _titleController.value.text,
+                  content: _contentController.value.text,
+                  active: false,
+                );
+                Navigator.of(context).pop(todo);
+              },
+              child: Text('저장하기'),
+            )
+          ],
         )),
       ),
     );
