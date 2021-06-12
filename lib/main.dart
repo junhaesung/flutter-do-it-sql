@@ -42,6 +42,14 @@ class DatabaseApp extends StatefulWidget {
 }
 
 class _DatabaseApp extends State<DatabaseApp> {
+  late Future<List<Todo>> todoList;
+
+  @override
+  void initState() {
+    super.initState();
+    this.todoList = getTodos();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,6 +71,12 @@ class _DatabaseApp extends State<DatabaseApp> {
   void _insertTodo(Todo todo) async {
     final Database database = await widget.db;
     await database.insert('todos', todo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<Todo>> getTodos() async {
+    final Database database = await widget.db;
+    final List<Map<String, dynamic>> maps = await database.query('todos');
+    return List.generate(maps.length, (index) => Todo.from(maps[index]));
   }
 }
 

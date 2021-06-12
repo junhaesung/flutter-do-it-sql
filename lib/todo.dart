@@ -10,6 +10,15 @@ class Todo {
       required this.active,
       this.id});
 
+  static Todo from(Map<String, dynamic> todoMap) {
+    return Todo(
+      title: todoMap['title'],
+      content: todoMap['content'],
+      active: todoMap['active'] == 1,
+      id: todoMap['id'],
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
