@@ -56,10 +56,43 @@ class _DatabaseApp extends State<DatabaseApp> {
       appBar: AppBar(
         title: Text('Database Example'),
       ),
-      body: Container(),
+      body: Container(
+          child: Center(
+              child: FutureBuilder(
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              return CircularProgressIndicator();
+            case ConnectionState.done:
+              if (!snapshot.hasData || snapshot.data == null) {
+                return Text('No data');
+              }
+              List<Todo> todos = snapshot.data as List<Todo>;
+              return ListView.builder(
+                itemBuilder: (context, index) {
+                  Todo todo = todos[index];
+                  return Card(
+                    child: Column(
+                      children: [
+                        Text(todo.title),
+                        Text(todo.content),
+                        Text(todo.active.toString()),
+                      ],
+                    ),
+                  );
+                },
+                itemCount: todos.length,
+              );
+          }
+        },
+        future: todoList,
+      ))),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final Todo todo = await Navigator.of(context).pushNamed('/add') as Todo;
+          final Todo todo =
+              await Navigator.of(context).pushNamed('/add') as Todo;
           _insertTodo(todo);
         },
         child: Icon(Icons.add),
@@ -70,7 +103,11 @@ class _DatabaseApp extends State<DatabaseApp> {
 
   void _insertTodo(Todo todo) async {
     final Database database = await widget.db;
-    await database.insert('todos', todo.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    await database.insert('todos', todo.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+    setState(() {
+      this.todoList = getTodos();
+    });
   }
 
   Future<List<Todo>> getTodos() async {
