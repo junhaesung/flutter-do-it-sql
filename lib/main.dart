@@ -59,81 +59,107 @@ class _DatabaseApp extends State<DatabaseApp> {
       body: Container(
           child: Center(
               child: FutureBuilder(
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.none:
-            case ConnectionState.waiting:
-            case ConnectionState.active:
-              return CircularProgressIndicator();
-            case ConnectionState.done:
-              if (!snapshot.hasData || snapshot.data == null) {
-                return Text('No data');
-              }
-              List<Todo> todos = snapshot.data as List<Todo>;
-              return ListView.builder(
-                itemBuilder: (context, index) {
-                  Todo todo = todos[index];
-                  return ListTile(
-                      title: Text(
-                        todo.title,
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      subtitle: Container(
-                        child: Column(
-                          children: [
-                            Text(todo.content),
-                            Text('체크 : ${todo.active.toString()}'),
-                            Container(
-                              height: 1,
-                              color: Colors.blue,
-                            )
-                          ],
-                        ),
-                      ),
-                      onTap: () async {
-                        TextEditingController controller = TextEditingController(text: todo.content);
-                        Todo result = await showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text('${todo.id} : ${todo.title}'),
-                                content: TextField(
-                                  controller: controller,
-                                  keyboardType: TextInputType.text,
-                                ),
-                                actions: [
-                                  FlatButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        todo.active = !todo.active;
-                                        todo.content = controller.value.text;
-                                      });
-                                      Navigator.of(context).pop(todo);
-                                    },
-                                    child: Text('예'),
-                                  ),
-                                  FlatButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: Text('아니오'),
+                builder: (context, snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                    case ConnectionState.waiting:
+                    case ConnectionState.active:
+                      return CircularProgressIndicator();
+                    case ConnectionState.done:
+                      if (!snapshot.hasData || snapshot.data == null) {
+                        return Text('No data');
+                      }
+                      List<Todo> todos = snapshot.data as List<Todo>;
+                      return ListView.builder(
+                        itemBuilder: (context, index) {
+                          Todo todo = todos[index];
+                          return ListTile(
+                            title: Text(
+                              todo.title,
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            subtitle: Container(
+                              child: Column(
+                                children: [
+                                  Text(todo.content),
+                                  Text('체크 : ${todo.active.toString()}'),
+                                  Container(
+                                    height: 1,
+                                    color: Colors.blue,
                                   )
                                 ],
-                              );
-                            });
-                        _updateTodo(result);
-                      });
+                              ),
+                            ),
+                            onTap: () async {
+                              TextEditingController controller = TextEditingController(
+                                  text: todo.content);
+                              Todo? result = await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('${todo.id} : ${todo.title}'),
+                                      content: TextField(
+                                        controller: controller,
+                                        keyboardType: TextInputType.text,
+                                      ),
+                                      actions: [
+                                        FlatButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              todo.active = !todo.active;
+                                              todo.content =
+                                                  controller.value.text;
+                                            });
+                                            Navigator.of(context).pop(todo);
+                                          },
+                                          child: Text('예'),
+                                        ),
+                                        FlatButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('아니오'),
+                                        )
+                                      ],
+                                    );
+                                  });
+                              if (result != null) {
+                                _updateTodo(result);
+                              }
+                            },
+                            onLongPress: () async {
+                              Todo? result = await showDialog(context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text('${todo.id} : ${todo.title}'),
+                                      content: Text(
+                                          '${todo.content}를 삭제하시겠습니까?'),
+                                      actions: [
+                                        FlatButton(onPressed: () {
+                                          Navigator.of(context).pop(todo);
+                                        }, child: Text('예'),),
+                                        FlatButton(onPressed: () {
+                                          Navigator.of(context).pop();
+                                        }, child: Text('아니오'),)
+                                      ],
+                                    )
+                                  });
+                              if (result != null) {
+                                _deleteTodo(result);
+                              }
+                            },
+                          );
+                        },
+                        itemCount: todos.length,
+                      );
+                  }
                 },
-                itemCount: todos.length,
-              );
-          }
-        },
-        future: todoList,
-      ))),
+                future: todoList,
+              ))),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final Todo todo =
-              await Navigator.of(context).pushNamed('/add') as Todo;
+          await Navigator.of(context).pushNamed('/add') as Todo;
           _insertTodo(todo);
         },
         child: Icon(Icons.add),
@@ -159,6 +185,14 @@ class _DatabaseApp extends State<DatabaseApp> {
       where: 'id = ?',
       whereArgs: [todo.id],
     );
+    setState(() {
+      todoList = getTodos();
+    });
+  }
+
+  void _deleteTodo(Todo todo) async {
+    final Database database = await widget.db;
+    await database.delete('todos', where: 'id=?', whereArgs: [todo.id]);
     setState(() {
       todoList = getTodos();
     });
@@ -200,34 +234,34 @@ class _AddTodoApp extends State<AddTodoApp> {
       body: Container(
         child: Center(
             child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: TextField(
-                controller: _titleController,
-                decoration: InputDecoration(labelText: '제목'),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: TextField(
-                controller: _contentController,
-                decoration: InputDecoration(labelText: '할 일'),
-              ),
-            ),
-            RaisedButton(
-              onPressed: () {
-                Todo todo = Todo(
-                  title: _titleController.value.text,
-                  content: _contentController.value.text,
-                  active: false,
-                );
-                Navigator.of(context).pop(todo);
-              },
-              child: Text('저장하기'),
-            )
-          ],
-        )),
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: TextField(
+                    controller: _titleController,
+                    decoration: InputDecoration(labelText: '제목'),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(10),
+                  child: TextField(
+                    controller: _contentController,
+                    decoration: InputDecoration(labelText: '할 일'),
+                  ),
+                ),
+                RaisedButton(
+                  onPressed: () {
+                    Todo todo = Todo(
+                      title: _titleController.value.text,
+                      content: _contentController.value.text,
+                      active: false,
+                    );
+                    Navigator.of(context).pop(todo);
+                  },
+                  child: Text('저장하기'),
+                )
+              ],
+            )),
       ),
     );
   }
