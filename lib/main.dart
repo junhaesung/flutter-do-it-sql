@@ -7,8 +7,14 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Future<Database> database = initDatabase();
+
     return MaterialApp(
-      home: DatabaseApp(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => DatabaseApp(database),
+        '/add': (context) => AddTodoApp(database),
+      },
     );
   }
 
@@ -16,7 +22,8 @@ class MyApp extends StatelessWidget {
     return openDatabase(
       join(await getDatabasesPath(), 'todo_database.db'),
       onCreate: (db, version) {
-        return db.execute('CREATE TABLE todos(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, active BOOL)');
+        return db.execute(
+            'CREATE TABLE todos(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, active BOOL)');
       },
       version: 1,
     );
@@ -24,6 +31,8 @@ class MyApp extends StatelessWidget {
 }
 
 class DatabaseApp extends StatefulWidget {
+  DatabaseApp(Future<Database> database);
+
   @override
   State<StatefulWidget> createState() => _DatabaseApp();
 }
@@ -44,5 +53,14 @@ class _DatabaseApp extends State<DatabaseApp> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+}
+
+class AddTodoApp extends StatelessWidget {
+  AddTodoApp(Future<Database> database);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold();
   }
 }
