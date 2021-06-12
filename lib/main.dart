@@ -73,15 +73,53 @@ class _DatabaseApp extends State<DatabaseApp> {
               return ListView.builder(
                 itemBuilder: (context, index) {
                   Todo todo = todos[index];
-                  return Card(
-                    child: Column(
-                      children: [
-                        Text(todo.title),
-                        Text(todo.content),
-                        Text(todo.active.toString()),
-                      ],
-                    ),
-                  );
+                  return ListTile(
+                      title: Text(
+                        todo.title,
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      subtitle: Container(
+                        child: Column(
+                          children: [
+                            Text(todo.content),
+                            Text('체크 : ${todo.active.toString()}'),
+                            Container(
+                              height: 1,
+                              color: Colors.blue,
+                            )
+                          ],
+                        ),
+                      ),
+                      onTap: () async {
+                        Todo result = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('${todo.id} : ${todo.title}'),
+                                content: Text('Todo를 체크하시겠습니까?'),
+                                actions: [
+                                  FlatButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        todo.active = !todo.active;
+                                      });
+                                      Navigator.of(context).pop(todo);
+                                    },
+                                    child: Text('예'),
+                                  ),
+                                  FlatButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text('아니오'),
+                                  )
+                                ],
+                              );
+                            });
+                        if (result != null) {
+                          _updateTodo(result);
+                        }
+                      });
                 },
                 itemCount: todos.length,
               );
@@ -107,6 +145,19 @@ class _DatabaseApp extends State<DatabaseApp> {
         conflictAlgorithm: ConflictAlgorithm.replace);
     setState(() {
       this.todoList = getTodos();
+    });
+  }
+
+  void _updateTodo(Todo todo) async {
+    final Database database = await widget.db;
+    await database.update(
+      'todos',
+      todo.toMap(),
+      where: 'id = ?',
+      whereArgs: [todo.id],
+    );
+    setState(() {
+      todoList = getTodos();
     });
   }
 
