@@ -134,21 +134,40 @@ class _DatabaseApp extends State<DatabaseApp> {
                             },
                           );
                         },
-                        itemCount: snapshot.data != null ? snapshot.data!.length : 0,
+                        itemCount: snapshot.data != null
+                            ? snapshot.data!.length
+                            : 0,
                       );
                   }
                 },
                 future: todoList,
               ))),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final Todo todo =
-          await Navigator.of(context).pushNamed('/add') as Todo;
-          _insertTodo(todo);
-        },
-        child: Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Column(
+        children: [
+          FloatingActionButton(
+            onPressed: () async {
+              final Todo? todo =
+              await Navigator.of(context).pushNamed('/add') as Todo;
+              if (todo != null) {
+                _insertTodo(todo);
+              }
+            },
+            child: Icon(Icons.add),
+            heroTag: null,
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              _updateAll();
+            },
+            heroTag: null,
+            child: Icon(Icons.update),
+          )
+        ],
+        mainAxisAlignment: MainAxisAlignment.end,
+      )
     );
   }
 
@@ -187,4 +206,13 @@ class _DatabaseApp extends State<DatabaseApp> {
     final List<Map<String, dynamic>> maps = await database.query('todos');
     return List.generate(maps.length, (index) => Todo.from(maps[index]));
   }
+
+  void _updateAll() async {
+    final Database database = await widget.db;
+    await database.rawQuery('update todos set active = 1 where active = 0');
+    setState(() {
+      todoList = getTodos();
+    });
+  }
+
 }

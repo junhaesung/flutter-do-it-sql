@@ -24,7 +24,7 @@ class Todo {
       'id': id,
       'title': title,
       'content': content,
-      'active': active,
+      'active': active ? 1 : 0,
     };
   }
 }
