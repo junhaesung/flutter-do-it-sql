@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'addTodoApp.dart';
+import 'clearListApp.dart';
 import 'databaseApp.dart';
 
 void main() => runApp(MyApp());
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => DatabaseApp(database),
         '/add': (context) => AddTodoApp(database),
+        '/clear': (context) => ClearListApp(database),
       },
     );
   }

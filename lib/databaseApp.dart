@@ -26,6 +26,20 @@ class _DatabaseApp extends State<DatabaseApp> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Database Example'),
+        actions: [
+          FlatButton(
+            onPressed: () async {
+              await Navigator.of(context).pushNamed('/clear');
+              setState(() {
+                todoList = getTodos();
+              });
+            },
+            child: Text(
+              '완료한 일',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
       ),
       body: Container(
           child: Center(
