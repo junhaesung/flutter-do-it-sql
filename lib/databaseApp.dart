@@ -43,7 +43,7 @@ class _DatabaseApp extends State<DatabaseApp> {
       ),
       body: Container(
           child: Center(
-              child: FutureBuilder(
+              child: FutureBuilder<List<Todo>>(
                 builder: (context, snapshot) {
                   switch (snapshot.connectionState) {
                     case ConnectionState.none:
@@ -54,10 +54,9 @@ class _DatabaseApp extends State<DatabaseApp> {
                       if (!snapshot.hasData || snapshot.data == null) {
                         return Text('No data');
                       }
-                      List<Todo> todos = snapshot.data as List<Todo>;
                       return ListView.builder(
                         itemBuilder: (context, index) {
-                          Todo todo = todos[index];
+                          Todo todo = snapshot.data![index];
                           return ListTile(
                             title: Text(
                               todo.title,
@@ -135,7 +134,7 @@ class _DatabaseApp extends State<DatabaseApp> {
                             },
                           );
                         },
-                        itemCount: todos.length,
+                        itemCount: snapshot.data != null ? snapshot.data!.length : 0,
                       );
                   }
                 },

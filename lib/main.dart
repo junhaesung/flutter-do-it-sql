@@ -28,7 +28,12 @@ class MyApp extends StatelessWidget {
       join(await getDatabasesPath(), 'todo_database.db'),
       onCreate: (db, version) {
         return db.execute(
-            'CREATE TABLE todos(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, active BOOL)');
+            'CREATE TABLE todos('
+                'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+                'title TEXT, '
+                'content TEXT, '
+                'active BOOL'
+                ')');
       },
       version: 1,
     );
